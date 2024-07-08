@@ -5,18 +5,14 @@
 #include <fstream>
 #include <vector>
 #include <thread>
-#include <mutex>
 #include <atomic>
 #include <tuple>
-
-std::mutex consoleMutex;
 
 void processFile(const QString& filePath,
                  std::vector<std::tuple<int, uint32_t, uint32_t>>& errors,
                  std::atomic<int>& errorCount) {
     std::ifstream file(filePath.toStdString(), std::ios::binary);
     if (!file) {
-        std::lock_guard<std::mutex> lock(consoleMutex);
         std::cerr << "Error opening file: " << filePath.toStdString() << std::endl;
         return;
     }
@@ -51,7 +47,7 @@ int main(int argc, char* argv[]) {
     }
 
     QString dirPath = QString::fromLocal8Bit(argv[1]);
-//    QString dirPath = "data_raw_32_rand_ch_offs_break";
+//    QString dirPath = "data_raw_32_rand_ch_offs";
     QDir dir(dirPath);
     QStringList filePaths = dir.entryList(QDir::Files);
 
