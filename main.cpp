@@ -20,14 +20,21 @@ void processFile(const QString& filePath,
     std::vector<uint32_t> lastValues(32, 0);
     std::vector<bool> isFirstRead(32, true);
 
-    uint32_t value;
+    uint32_t value = 0;
+    char buffer[sizeof(uint32_t)];
     int channel = 0;
-    while (file.read(reinterpret_cast<char*>(&value), sizeof(value))) {
+    while (file.read(buffer, sizeof(buffer))) {
+        std::copy(buffer, buffer + sizeof(buffer), reinterpret_cast<char*>(&value));
         if (isFirstRead[channel]) {
             lastValues[channel] = value;
             isFirstRead[channel] = false;
         } else {
-            uint32_t expected = (lastValues[channel] == 0xFFFFFFFF) ? 0 : lastValues[channel] + 1;
+            uint32_t expected = 0;
+            if (lastValues[channel] == 0xFFFFFFFF) {
+                expected = 0;
+            } else {
+                expected = lastValues[channel] + 1;
+            }
             if (value != expected) {
                 errors.emplace_back(channel, expected, value);
                 errorCount++;
@@ -47,7 +54,7 @@ int main(int argc, char* argv[]) {
     }
 
     QString dirPath = QString::fromLocal8Bit(argv[1]);
-//    QString dirPath = "data_raw_32_rand_ch_offs";
+//    QString dirPath = "data_raw_32_rand_ch_offs_break";
     QDir dir(dirPath);
     QStringList filePaths = dir.entryList(QDir::Files);
 
