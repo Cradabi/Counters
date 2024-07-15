@@ -95,12 +95,16 @@ TEST(ProcessDirectoryTest, NoErrors) {
     std::ifstream outputFile("output_no_errors.txt");
     std::vector<std::string> lines;
     std::string line;
+
     while (std::getline(outputFile, line)) {
         lines.push_back(line);
     }
+
     outputFile.close();
 
-    ASSERT_EQ(lines.size(), 8);
+    if (lines.size() != 8) {
+        FAIL() << "Expected 8 lines in the output file, but got " << lines.size();
+    }
 
     std::vector<std::string> expectedLines = {
         "File: afe0_core0.pcm, Total errors: 0",
@@ -113,12 +117,16 @@ TEST(ProcessDirectoryTest, NoErrors) {
         "File: afe0_core7.pcm, Total errors: 0"
     };
 
-        for (int i = 0; i < expectedLines.size(); ++i) {
-            EXPECT_EQ(lines[i], expectedLines[i]);
+    for (int i = 0; i < expectedLines.size(); ++i) {
+        if (lines[i] != expectedLines[i]) {
+            FAIL() << "Line " << i << " is not as expected:\n"
+                   << "Expected: " << expectedLines[i] << "\n"
+                   << "Actual  : " << lines[i];
         }
-
-        QFile::remove("output_no_errors.txt");
     }
+
+    QFile::remove("output_no_errors.txt");
+}
 
 TEST(ProcessDirectoryTest, WithErrors) {
     processDirectory(WITH_ERRORS_DIR, "output_with_errors.txt");
@@ -126,11 +134,17 @@ TEST(ProcessDirectoryTest, WithErrors) {
     std::ifstream outputFile("output_with_errors.txt");
     std::vector<std::string> lines;
     std::string line;
+
     while (std::getline(outputFile, line)) {
         lines.push_back(line);
     }
+
     outputFile.close();
-    EXPECT_GT(lines.size(), 8);
+
+    if (lines.size() <= 8) {
+        FAIL() << "Expected more than 8 lines in the output file, but got " << lines.size();
+    }
+
     QFile::remove("output_with_errors.txt");
 }
 
