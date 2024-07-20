@@ -47,6 +47,21 @@ TEST(CountersTest, WithErrors) {
     if (result.find("Expected:") == std::string::npos) {
         FAIL() << "No error lines found in the result";
     }
+
+    // Дополнительная проверка на наличие словосочетания "Total errors: 128" ровно 8 раз
+    std::string expectedSubstring = "Total errors: 128";
+    int substringCount = 0;
+    std::string::size_type pos = 0;
+    while ((pos = result.find(expectedSubstring, pos)) != std::string::npos) {
+        ++substringCount;
+        pos += expectedSubstring.length();
+    }
+    int expectedSubstringCount = 8;
+
+    if (substringCount != expectedSubstringCount) {
+        FAIL() << "Expected substring '" << expectedSubstring << "' to occur "
+               << expectedSubstringCount << " times, but it occurred " << substringCount << " times";
+    }
 }
 
 int main(int argc, char **argv) {
